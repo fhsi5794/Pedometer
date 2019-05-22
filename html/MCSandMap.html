@@ -1,0 +1,80 @@
+<html lang="zh-tw">
+
+<head>
+  <meta charset="utf-8">
+  <title>MCSandMap</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script type="text/javascript">
+  $(document).ready(function(){
+    $('.MCS').hide();
+
+    //接收MCS資料
+    $.ajax({
+      type: "GET",
+      url: "https://api.mediatek.com/mcs/v2/devices/Df0bQ60Z/datachannels/clear/datapoints",
+      headers: { deviceKey: "k8a8hTRy7MCjuDGE" },
+      contentType: "application/json"
+    })
+    //收到資料
+    .done(function(data){
+      $('.MCS').show();
+      $('.MCS').append("Connect success.<br>");
+      var d = JSON.stringify(data);
+      $('.MCS').append(d,"<br>");
+      $('.MCS').append("----------<br>");
+      var dd = data["dataChannels"][0]["dataPoints"][0]["values"]["value"];
+      $('.MCS').append(dd,"<br>==========<br>");
+    });
+
+  });
+</script>
+
+<style type="text/css" media="screen">
+html {
+  height: 100%;
+  width: 100%;
+}
+
+#map {
+  position: relative;
+  height: 50%;
+  width: 50%;
+}
+
+#body {
+  height: 100%;
+  width: 100vw;
+  position: relative;
+  top: 0;
+  left: 25%;
+}
+</style>
+</head>
+
+<body>
+  <div class="body">
+    <h1>MCSandMap</h1>
+    <div id="map"></div>
+  </div>
+  <div class="MCS">  </div>
+  <!--建立 google Map -->
+  <script>
+  function initMap() {
+    var Station_latlng = { lat: 25.0136906, lng: 121.5406792 }; // 經緯度
+    var map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 14, //放大的倍率
+      center: Station_latlng //初始化的地圖中心位置
+    });
+    //建立一個mark
+    var marker = new google.maps.Marker({
+      position: Station_latlng, //marker的放置位置
+      map: map //這邊的map指的是第四行的map變數
+    });
+  }
+  </script>
+  <!--記得輸入 google Map 金鑰-->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBLQoezVVh9hBrCNc22FZOvQsOVA1Q6Ol8&callback=initMap">
+  </script>
+</body>
+
+</html>
