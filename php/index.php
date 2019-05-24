@@ -85,51 +85,46 @@
         $('#MCS').append("----------<br>");
         var dd = data["dataChannels"][0]["dataPoints"][0]["values"]["value"];
         $('#MCS').append("清空步數:",dd,"<br>==========<br>");
-      });
-
+    })
       $.ajax({
         type: "GET",
         url: "https://api.mediatek.com/mcs/v2/devices/Df0bQ60Z/datachannels/GPS/datapoints",
         headers: { deviceKey: "k8a8hTRy7MCjuDGE" },
         contentType: "application/json"
       })
-      //收到資料
       .done(function(data){
+        $('#MCS').show();
         $('#MCS').append("----------<br>");
         var dd = data["dataChannels"][0]["dataPoints"][0]["values"]["value"];
-        $('#MCS').append("位置:"dd,"<br>==========<br>");
-      });
-
+        $('#MCS').append("位置:",dd,"<br>==========<br>");
+    })
       $.ajax({
         type: "GET",
         url: "https://api.mediatek.com/mcs/v2/devices/Df0bQ60Z/datachannels/battery_level/datapoints",
         headers: { deviceKey: "k8a8hTRy7MCjuDGE" },
         contentType: "application/json"
       })
-      //收到資料
       .done(function(data){
+        $('#MCS').show();
         $('#MCS').append("----------<br>");
         var dd = data["dataChannels"][0]["dataPoints"][0]["values"]["value"];
-        $('#MCS').append("電池電量:"dd,"<br>==========<br>");
-      });
-
+        $('#MCS').append("電池電量:",dd,"<br>==========<br>");
+    })
       $.ajax({
         type: "GET",
         url: "https://api.mediatek.com/mcs/v2/devices/Df0bQ60Z/datachannels/today_step/datapoints",
         headers: { deviceKey: "k8a8hTRy7MCjuDGE" },
         contentType: "application/json"
       })
-      //收到資料
       .done(function(data){
         $('#MCS').show();
-        $('#MCS').append("MCS connect.<br>");
-        var d = JSON.stringify(data);
-        $('#MCS').append(d,"<br>");
         $('#MCS').append("----------<br>");
         var dd = data["dataChannels"][0]["dataPoints"][0]["values"]["value"];
-        $('#MCS').append("今日步數:"dd,"<br>==========<br>");
-      });
+        $('#MCS').append("今日步數:",dd,"<br>==========<br>");
+    })
+      
     });
+
     </script>
     <!-- 日期選擇器 -->
     <script>
@@ -158,7 +153,7 @@
         {
           $row = mysqli_fetch_assoc($result);
           echo "<h1>你走了 ";
-          echo $row['steps'];
+          echo $row['step'];
           echo " 步<br><font>";
         }
       }
