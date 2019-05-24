@@ -74,8 +74,8 @@
       //接收MCS資料 
       $.ajax({
         type: "GET",
-        url: "https://api.mediatek.com/mcs/v2/devices/Df0bQ60Z/datachannels/clear/datapoints",
-        headers: { deviceKey: "k8a8hTRy7MCjuDGE" },
+        url: "https://api.mediatek.com/mcs/v2/devices/DIJoVbTM/datachannels/clear/datapoints",
+        headers: { deviceKey: "bL7lysMI7SqIzSzz" },
         contentType: "application/json"
       })
       //收到資料
@@ -88,20 +88,21 @@
     })
       $.ajax({
         type: "GET",
-        url: "https://api.mediatek.com/mcs/v2/devices/Df0bQ60Z/datachannels/GPS/datapoints",
-        headers: { deviceKey: "k8a8hTRy7MCjuDGE" },
+        url: "https://api.mediatek.com/mcs/v2/devices/DIJoVbTM/datachannels/GPS/datapoints",
+        headers: { deviceKey: "bL7lysMI7SqIzSzz" },
         contentType: "application/json"
       })
       .done(function(data){
         $('#MCS').show();
         $('#MCS').append("----------<br>");
-        var dd = data["dataChannels"][0]["dataPoints"][0]["values"]["value"];
-        $('#MCS').append("位置:",dd,"<br>==========<br>");
+        var latitude = data["dataChannels"][0]["dataPoints"][0]["values"]["latitude"];
+        var longitude = data["dataChannels"][0]["dataPoints"][0]["values"]["longitude"];
+        $('#MCS').append("位置:(",latitude,",",longitude,")<br>==========<br>");
     })
       $.ajax({
         type: "GET",
-        url: "https://api.mediatek.com/mcs/v2/devices/Df0bQ60Z/datachannels/battery_level/datapoints",
-        headers: { deviceKey: "k8a8hTRy7MCjuDGE" },
+        url: "https://api.mediatek.com/mcs/v2/devices/DIJoVbTM/datachannels/battery_level/datapoints",
+        headers: { deviceKey: "bL7lysMI7SqIzSzz" },
         contentType: "application/json"
       })
       .done(function(data){
@@ -112,8 +113,8 @@
     })
       $.ajax({
         type: "GET",
-        url: "https://api.mediatek.com/mcs/v2/devices/Df0bQ60Z/datachannels/today_step/datapoints",
-        headers: { deviceKey: "k8a8hTRy7MCjuDGE" },
+        url: "https://api.mediatek.com/mcs/v2/devices/DIJoVbTM/datachannels/today_step/datapoints",
+        headers: { deviceKey: "bL7lysMI7SqIzSzz" },
         contentType: "application/json"
       })
       .done(function(data){
