@@ -32,7 +32,7 @@
 
 
 LWiFiClient content;
-HttpClient http(content);
+
 unsigned int rtc;
 unsigned int lrtc;
 unsigned int rtc1;
@@ -52,8 +52,7 @@ int x,y,z;
 int xavg, yavg,zavg, steps=0, flag=0;
 int xval[15]={0}, yval[15]={0}, zval[15]={0};
 int threshhold = 20.0;
-int accel=0;
-int c = 0, sendBool = 0;
+int accel = 0, c = 0;
 
 String Battery;
 String GPS;
@@ -216,18 +215,22 @@ void convertCoords(float tmplat, float tmplong, const char* n_or_s, const char* 
   longitude_str = GPSbuff;
 }
 
-void getconnectInfo(){
-
+char* getInfo(String dataChannel, int* dataSize){
+  HttpClient http(content);
+  // keep retrying until connected to website
+  Serial.println("Connecting to WebSite");
   while (0 == content.connect(SITE_URL, 80))
   {
     Serial.println("Re-Connecting to WebSite");
     delay(1000);
   }
-  
+
   //calling RESTful API to get TCP socket connection
   content.print("GET /mcs/v2/devices/");
   content.print(DEVICEID);
-  content.println("/datachannels/today_step/datapoints.csv HTTP/1.1");
+  content.print("/datachannels/");
+  content.print(dataChannel);
+  content.println("/datapoints.csv HTTP/1.1");
   content.print("Host: ");
   content.println(SITE_URL);
   content.print("deviceKey: ");
@@ -245,7 +248,7 @@ void getconnectInfo(){
     errorcount += 1;
     if (errorcount > 10) {
       content.stop();
-      return;
+      return 0;
     }
     delay(100);
   }
@@ -254,11 +257,10 @@ void getconnectInfo(){
   int bodyLen = http.contentLength();
   Serial.print("Content length is: ");
   Serial.println(bodyLen);
-  Serial.println();
-  int index = 0;
+  int index = 0; 
   while (content)
   {
-    int v = content.read();
+    int v = content.read();   
     if (v != -1)
     {
       Serial.print((char)v);
@@ -267,28 +269,13 @@ void getconnectInfo(){
     }
     else
     {
+      Serial.println(" ");
       Serial.println("no more content, disconnect");
       content.stop();
     }    
   }
-  
-  Serial.println("\nThe connection info: ");
-  Serial.println(connection_info);  
-  int comma1,comma2;
-  String tmp="";
-  comma1 = getComma(1, connection_info);
-  comma2 = getComma(2, connection_info);
-  for(int i = comma1; i < comma2 - 4; i++)
-    tmp+=connection_info[i];
-  time_t getInfoTime = tmp.toInt();
-  Serial.print("get time day:");
-  Serial.print(day(getInfoTime));
-  Serial.print("get time hour:");
-  Serial.println(hour(getInfoTime));
-  tmp="";
-  for(int i = comma2;i < index;i++)
-    tmp+=connection_info[i];
-  steps = tmp.toInt();
+  *dataSize = index;
+  return connection_info;
 }
 
 boolean disconnectedMsg = false;
@@ -389,9 +376,9 @@ int ArduinoPedometer(){
       totvect[i] = sqrt(((xaccl[i]-xavg)* (xaccl[i]-xavg))+ ((yaccl[i] - yavg)*(yaccl[i] - yavg)) + ((zval[i] - zavg)*(zval[i] - zavg)));
       totave[i] = (totvect[i] + totvect[i-1]) / 2 ;
       delay(150);
-      Serial.print(" totave:");
+      Serial.print("totave:");
       Serial.println(totave[i]);
-      Serial.print(" accel:");
+      Serial.print("accel:");
       Serial.println(accel);
       if( (totave[i] - accel) > threshhold)
         steps++;
@@ -400,6 +387,71 @@ int ArduinoPedometer(){
     }
   delay(100); 
  }
+//更新當下時間
+ void updateTime(){
+  //利用傳送一次資訊來更新成當下時間
+  int index = 0, comma;
+  char* info = getInfo("today_step", &index);
+  String tmp="";
+  comma = getComma(2, info);
+  for(int i = comma; i < index;i++)
+    tmp += connection_info[i];
+  steps = tmp.toInt();
+  tmp = "today_step,," + (String)steps;
+  sendValue(tmp, tmp.length());
+  Serial.println("#update current time.");
+ }
+ 
+//比對日期
+void compareDate(){
+  int index = 0;
+  char* info = getInfo("newDate", &index);
+  int lastUpdateDate, lastUpdateStepDate;
+  time_t StepDate;
+  int comma1,comma2;
+  String tmp ="";
+  //上次上傳的時間
+  comma2 = getComma(2, info);
+  for(int i = comma2; i < index; i++)
+    tmp += info[i];
+  lastUpdateDate = tmp.toInt();
+  //這次上傳的時間
+  index = 0;
+  info = getInfo("today_step", &index);
+  Serial.print("index:");
+  Serial.println(index);
+  comma1 = getComma(1, info);
+  comma2 = getComma(2, info);
+  tmp ="";
+  for(int i = comma1; i < comma2 - 4; i++)
+    tmp += info[i];
+  StepDate = tmp.toInt();
+  Serial.println(hour(StepDate));
+  if(hour(StepDate)+8 >= 24)
+    lastUpdateStepDate = day(StepDate) + 1;
+  else
+    lastUpdateStepDate = day(StepDate);
+  Serial.print("Last update date:");
+  Serial.println(lastUpdateDate);
+  Serial.print("Last update steps date:");
+  Serial.println(lastUpdateStepDate);
+  //不一樣的話更新上傳時間，步數歸零
+  if(lastUpdateDate != lastUpdateStepDate){
+    String updateDate = "newDate,," + (String)lastUpdateStepDate;
+    sendValue(updateDate, updateDate.length());
+    steps = 0;
+    Serial.println("#Steps reset.");
+  }
+  //一樣的話繼續增加步數
+  else{
+    tmp="";
+    for(int i = comma2; i < index;i++)
+      tmp += connection_info[i];
+    steps = tmp.toInt();
+    Serial.println("#Steps start counting.");
+  }
+  
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -420,18 +472,17 @@ void setup() {
   Serial.println("Connecting to AP");
   while (!LWiFi.connectWPA(WIFI_AP,WIFI_PASSWORD))
   {
-    Serial.println("000");
+    Serial.println("Wifi connect faild.");
     delay(100);
   }
 
-  // keep retrying until connected to website
-  Serial.println("Connecting to WebSite");
-  while (0 == content.connect(SITE_URL, 80))
-  {
-    Serial.println("Re-Connecting to WebSite");
-    delay(1000);
-  }
-  getconnectInfo();
+  
+  //先上傳一次來更新當下時間
+  updateTime();
+  delay(5000);
+  //做日期比對及更新步數初始值
+  compareDate();
+  delay(1000);
 }
 
 void loop()
@@ -465,6 +516,7 @@ void loop()
     sendValue(StepData, StepLength);
     delay(100);
     GPS = "GPS,," + latitude_str + "," + longitude_str + "," + altitude_str;
+    //GPS = "GPS,,49.734,15.014,104.5";
     GPSLength = GPS.length();
     sendValue(GPS, GPSLength);
     delay(100);
@@ -472,9 +524,10 @@ void loop()
     BatteryLength = Battery.length();
     sendValue(Battery, BatteryLength);
     delay(100);
-    Serial.println("Send values.");
+    Serial.println("#Send values.");
     lrtc1 = rtc1;
   }
+  
   
   delay(100);  
 }
