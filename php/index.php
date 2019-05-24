@@ -8,7 +8,7 @@
   <title>Pedometer</title>
   <?PHP
   // 建立MySQL連結
-  $link = mysqli_connect("127.0.0.1","root","1013","miniPro")
+  $link = mysqli_connect("127.0.0.1","root","an334an334","miniPro")
   or die("無法開啟MySQL資料庫連接!<br/>");
   ?>
   <style type="text/css" media="screen">
@@ -71,10 +71,51 @@
     <script type="text/javascript">
     $(document).ready(function(){
       $('#MCS').hide();
-      //接收MCS資料
+      //接收MCS資料 
       $.ajax({
         type: "GET",
         url: "https://api.mediatek.com/mcs/v2/devices/Df0bQ60Z/datachannels/clear/datapoints",
+        headers: { deviceKey: "k8a8hTRy7MCjuDGE" },
+        contentType: "application/json"
+      })
+      //收到資料
+      .done(function(data){
+        $('#MCS').show();
+        $('#MCS').append("MCS connect.<br>");
+        $('#MCS').append("----------<br>");
+        var dd = data["dataChannels"][0]["dataPoints"][0]["values"]["value"];
+        $('#MCS').append("清空步數:",dd,"<br>==========<br>");
+      });
+
+      $.ajax({
+        type: "GET",
+        url: "https://api.mediatek.com/mcs/v2/devices/Df0bQ60Z/datachannels/GPS/datapoints",
+        headers: { deviceKey: "k8a8hTRy7MCjuDGE" },
+        contentType: "application/json"
+      })
+      //收到資料
+      .done(function(data){
+        $('#MCS').append("----------<br>");
+        var dd = data["dataChannels"][0]["dataPoints"][0]["values"]["value"];
+        $('#MCS').append("位置:"dd,"<br>==========<br>");
+      });
+
+      $.ajax({
+        type: "GET",
+        url: "https://api.mediatek.com/mcs/v2/devices/Df0bQ60Z/datachannels/battery_level/datapoints",
+        headers: { deviceKey: "k8a8hTRy7MCjuDGE" },
+        contentType: "application/json"
+      })
+      //收到資料
+      .done(function(data){
+        $('#MCS').append("----------<br>");
+        var dd = data["dataChannels"][0]["dataPoints"][0]["values"]["value"];
+        $('#MCS').append("電池電量:"dd,"<br>==========<br>");
+      });
+
+      $.ajax({
+        type: "GET",
+        url: "https://api.mediatek.com/mcs/v2/devices/Df0bQ60Z/datachannels/today_step/datapoints",
         headers: { deviceKey: "k8a8hTRy7MCjuDGE" },
         contentType: "application/json"
       })
@@ -86,7 +127,7 @@
         $('#MCS').append(d,"<br>");
         $('#MCS').append("----------<br>");
         var dd = data["dataChannels"][0]["dataPoints"][0]["values"]["value"];
-        $('#MCS').append(dd,"<br>==========<br>");
+        $('#MCS').append("今日步數:"dd,"<br>==========<br>");
       });
     });
     </script>
