@@ -1,3 +1,5 @@
+#include <ADXL345.h>
+
 #include <Time.h>
 #include <TimeLib.h>
 #include <HttpClient.h>
@@ -51,7 +53,7 @@ char str[512];                      //string buffer to transform data before sen
 int x,y,z;
 int xavg, yavg,zavg, steps=0, flag=0;
 int xval[15]={0}, yval[15]={0}, zval[15]={0};
-int threshhold = 20.0;
+int threshhold = 60.0;
 int accel = 0, c = 0;
 
 String Battery;
@@ -376,15 +378,26 @@ int ArduinoPedometer(){
       totvect[i] = sqrt(((xaccl[i]-xavg)* (xaccl[i]-xavg))+ ((yaccl[i] - yavg)*(yaccl[i] - yavg)) + ((zval[i] - zavg)*(zval[i] - zavg)));
       totave[i] = (totvect[i] + totvect[i-1]) / 2 ;
       delay(150);
-      Serial.print("totave:");
-      Serial.println(totave[i]);
-      Serial.print("accel:");
-      Serial.println(accel);
-      if( (totave[i] - accel) > threshhold)
-        steps++;
-      accel = totave[i];
+      if (totave[i]>threshhold && flag==0)
+      {
+         steps=steps+1;
+         flag=1;
+      }
+      else if (totave[i] > threshhold && flag==1)
+      {
+          //do nothing 
+      }
+      if (totave[i] <threshhold  && flag==1)
+      {
+        flag=0;
+      }
+      Serial.print("totave=");
+      Serial.print(totave[i]);
+      Serial.print("steps=");
+      Serial.println(steps);
       return(steps);
     }
+  
   delay(100); 
  }
 //更新當下時間
