@@ -1,5 +1,20 @@
 XAMPP用法 ＆ MySQL常用指令
 ===
+# 程式說明
+### 更新MySQL
+在 *index.php* 
+```javascript
+$.post('updateMySQL.php',{
+      time: updateTime,
+      step: steps
+    },function(txt){
+      $('#update').append(txt);
+    });
+```
+會把從MCS拿到得值傳到 *updateMySQL.php* 裡面
+然後php內的 ```php echo ``` 會回傳到finction的txt
+
+---
 # XAMPP用法
 1. 下載
 2. start，Apache、MySQL伺服器記得要開
