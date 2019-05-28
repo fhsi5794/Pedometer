@@ -122,7 +122,7 @@
         var steps = data["dataChannels"][0]["dataPoints"][0]["values"]["value"];
         var updateTime = data["dataChannels"][0]["dataPoints"][0]["recordedAt"];
         $('#MCS').append("今日步數:",steps,"<br>==========<br>");
-        $.post('updateMySQL',{
+        $.post('updateMySQL.php',{
           time: updateTime,
           step: steps
         },function(txt){
