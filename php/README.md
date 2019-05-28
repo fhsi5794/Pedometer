@@ -1,5 +1,3 @@
-README
-===
 # 程式說明
 ### 更新MySQL
 #### 在 *index.php* 
