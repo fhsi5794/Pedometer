@@ -1,4 +1,4 @@
-XAMPP用法 ＆ MySQL常用指令
+README
 ===
 # 程式說明
 ### 更新MySQL
